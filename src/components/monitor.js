@@ -7,7 +7,7 @@ let EventEmitter = require('eventemitter2').EventEmitter2,
     charm = require('charm')();
 
 
-var Monitor = function(advertisement, discoveryOptions) {
+let Monitor = function(advertisement, discoveryOptions) {
     discoveryOptions = discoveryOptions || {};
 
     _.defaults(discoveryOptions, {
@@ -19,7 +19,7 @@ var Monitor = function(advertisement, discoveryOptions) {
     advertisement.key = Monitor.environment + (advertisement.key || '');
 
     let that = this,
-        d = this.discovery = Discovery(advertisement, discoveryOptions),
+        d = this.discovery = new Discovery(advertisement, discoveryOptions),
         host = discoveryOptions && discoveryOptions.address || '0.0.0.0',
         interval = discoveryOptions.interval || 5000;
 

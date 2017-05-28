@@ -1,94 +1,85 @@
-var Discover = require('node-discover'),
-    colors = require('colors'),
-    _ = require('lodash');
+const Discover = require('node-discover');
+const colors = require('colors');
+const _ = require('lodash');
 
-var Discovery = function(advertisement, options = {}) {
-    _.defaults(options, Discovery.defaults, {
-        helloInterval: 2000,
-        checkInterval: 4000,
-        nodeTimeout: 5000,
-        masterTimeout: 6000,
-        monitor: false,
-        log: true,
-        helloLogsEnabled: true,
-        statusLogsEnabled: true,
-        ignoreProcess: false
-    });
+class Discovery extends Discover {
 
-    _.defaults(advertisement, {
-        type: 'service'
-    });
+    constructor(advertisement, options = {}) {
+        _.defaults(options, Discovery.defaults, {
+            helloInterval: 2000,
+            checkInterval: 4000,
+            nodeTimeout: 5000,
+            masterTimeout: 6000,
+            monitor: false,
+            log: true,
+            helloLogsEnabled: true,
+            statusLogsEnabled: true,
+            ignoreProcess: false,
+        });
 
-    var d = new Discover(options);
+        super(options);
 
-    d.me.processId = d.broadcast.processUuid;
-    d.me.processCommand = process.argv.slice(1).map(function(n) {
-        return n.split('/').slice(-2).join('/');
-    }).join(' ');
+        this.advertisement = _.defaults(advertisement, {
+            type: 'service',
+        });
 
-    d.advertise(advertisement);
+        this.advertise(advertisement);
 
-    options.log && log(helloLogger(d));
+        this.me.processId = this.broadcast.processUuid;
+        this.me.processCommand = process.argv.slice(1).map((n) => {
+            return n.split('/').slice(-2).join('/');
+        }).join(' ');
 
-    d.on('added', function(obj) {
-        if (!options.monitor && obj.advertisement.key != advertisement.key) return;
+        options.log && this.log(this.helloLogger());
 
-        options.log && options.helloLogsEnabled && log(statusLogger(obj, 'online'));
-    });
+        this.on('added', (obj) => {
+            if (!options.monitor &&
+                !_.isEqual(obj.advertisement.key, advertisement.key)) return;
+            options.log && options.helloLogsEnabled &&
+            this.log(this.statusLogger('online'));
+        });
 
-    d.on('removed', function(obj) {
-        if (!options.monitor && obj.advertisement.key != advertisement.key) return;
-
-        options.log && options.statusLogsEnabled && log(statusLogger(obj, 'offline'));
-    });
-
-    return d;
-};
-
-Discovery.setDefaults = function(options) {
-    Discovery.defaults = options;
-};
-
-var helloLogger = function(d) {
-    var adv = d.me,
-        log = [];
-
-    d.me.id = d.broadcast.instanceUuid;
-
-    log.push('\nHello! I\'m'.white);
-    log = log.concat(statusLogger(adv));
-    log.push('\n========================\n'.white);
-
-    return log;
-};
-
-var statusLogger = function(obj, config) {
-    var adv = obj.advertisement,
-        log = [],
-        status;
-
-    switch (config) {
-        case 'online':
-            status = '.online'.green;
-            break;
-        case 'offline':
-            status = '.offline'.red;
-            break;
+        this.on('removed', (obj) => {
+            if (!options.monitor &&
+                !_.isEqual(obj.advertisement.key, advertisement.key)) return;
+            options.log && options.statusLogsEnabled &&
+            this.log(this.statusLogger('offline'));
+        });
     }
 
-    if (status)
-        log.push(adv.type.magenta + status)
+    static setDefaults(options) {
+        this.defaults = options;
+    }
 
-    log.push(adv.name.white + '#'.grey + obj.id.grey);
+    log(logs) {
+        console.log.apply(console.log, logs);
+    }
 
-    if (adv.port)
-        log.push('on', adv.port.toString().blue);
+    helloLogger() {
+        return _.concat('\nHello! I\'m'.white, this.statusLogger(),
+            '\n========================\n'.white);
+    }
 
-    return log;
-};
+    statusLogger(status) {
+        const logs = [];
 
-var log = function(log) {
-    console.log.apply(console.log, log);
-};
+        if (status) {
+            const statusLog = _.isEqual(status, 'online')
+                ? '.online'.green
+                : '.offline'.red;
+            logs.push(this.advertisement.type.magenta + statusLog);
+        }
+
+        logs.push(
+            `${this.advertisement.name.white} ${' #'.grey}${this.broadcast.instanceUuid.grey}`);
+
+        if (this.advertisement.port) {
+            logs.push('on', this.advertisement.port.toString().blue);
+        }
+
+        return logs;
+    }
+
+}
 
 module.exports = Discovery;

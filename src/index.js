@@ -7,7 +7,8 @@ var Discovery = require('./components/discovery'),
     Monitor = require('./components/monitor'),
     MonitoringTool = require('./monitoring-tool'),
     TimeBalancedRequester = require('./components/time-balanced-requester'),
-    PendingBalancedRequester = require('./components/pending-balanced-requester');
+    PendingBalancedRequester = require(
+        './components/pending-balanced-requester');
 
 var _ = require('lodash');
 
@@ -18,28 +19,35 @@ function cote(options) {
         environment: '',
         useHostNames: false,
         broadcast: null,
-        multicast: null
+        multicast: null,
     };
 
     var environmentSettings = {
         environment: process.env.COTE_ENV,
         useHostNames: !!process.env.COTE_USE_HOST_NAMES,
         broadcast: process.env.COTE_BROADCAST_ADDRESS ||
-            (process.env.DOCKERCLOUD_IP_ADDRESS ? '10.7.255.255' : undefined),
-        multicast: process.env.COTE_MULTICAST_ADDRESS
+        (process.env.DOCKERCLOUD_IP_ADDRESS ? '10.7.255.255' : undefined),
+        multicast: process.env.COTE_MULTICAST_ADDRESS,
     };
 
     _.defaults(options, environmentSettings, defaults);
 
-    var components = [Requester, Responder, Publisher, Subscriber, Sockend, TimeBalancedRequester,
+    Discovery.setDefaults(options);
+
+    var components = [
+        Requester,
+        Responder,
+        Publisher,
+        Subscriber,
+        Sockend,
+        TimeBalancedRequester,
         PendingBalancedRequester];
 
     components.forEach(function(component) {
         component.setEnvironment(options.environment);
-        component.setUseHostNames && component.setUseHostNames(options.useHostNames);
+        component.setUseHostNames &&
+        component.setUseHostNames(options.useHostNames);
     });
-
-    Discovery.setDefaults(options);
 
     return cote;
 }

@@ -1,5 +1,5 @@
-let EventEmitter = require('eventemitter2').EventEmitter2;
-let discovery = require('./discovery');
+const EventEmitter = require('eventemitter2').EventEmitter2;
+const Discovery = require('./discovery');
 
 module.exports = class Component extends EventEmitter {
     constructor(advertisement, discoveryOptions) {
@@ -19,11 +19,13 @@ module.exports = class Component extends EventEmitter {
         this.advertisement.axon_type = this.type;
 
         this.discoveryOptions = discoveryOptions || {};
-        this.discoveryOptions.address = this.discoveryOptions.address || '0.0.0.0';
+        this.discoveryOptions.address = this.discoveryOptions.address ||
+            '0.0.0.0';
     }
 
     startDiscovery() {
-        this.discovery = discovery(this.advertisement, this.discoveryOptions);
+        this.discovery = new Discovery(this.advertisement,
+            this.discoveryOptions);
 
         this.discovery.on('added', (obj) => {
             if (
@@ -35,7 +37,6 @@ module.exports = class Component extends EventEmitter {
             this.onAdded(obj);
             this.emit('cote:added', obj);
         });
-
         this.discovery.on('removed', (obj) => {
             if (
                 obj.advertisement.axon_type != this.oppo ||
