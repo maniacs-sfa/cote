@@ -24,6 +24,7 @@ class Discovery extends Discover {
 
         this.advertise(advertisement);
 
+        this.me.id = this.broadcast.instanceUuid;
         this.me.processId = this.broadcast.processUuid;
         this.me.processCommand = process.argv.slice(1).map((n) => {
             return n.split('/').slice(-2).join('/');
