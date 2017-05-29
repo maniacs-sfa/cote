@@ -1,25 +1,24 @@
-'use strict';
-
 module.exports = function(port) {
-    let fs = require('fs'),
-        _ = require('lodash'),
-        cote = require('../');
+    const fs = require('fs');
+    const _ = require('lodash');
+    const cote = require('../');
+    const portfinder = require('portfinder');
 
-    let app = require('http').createServer(handler),
-        io = require('socket.io').listen(app);
+    const server = require('http').createServer(handler);
+    const io = require('socket.io').listen(server);
 
     // Instantiate a monitor, sockend and publisher components
-    let monitor = new cote.Monitor({
+    const monitor = new cote.Monitor({
         name: 'monitor',
     }, { disableScreen: true });
 
-    let sockend = new cote.Sockend(io, {
+    const sockend = new cote.Sockend(io, {
         name: 'sockend',
         namespace: 'monitoring',
         key: 'monitoring',
     });
 
-    let publisher = new cote.Publisher({
+    const publisher = new cote.Publisher({
         name: 'status publisher',
         broadcasts: ['statusUpdate'],
         namespace: 'monitoring',
@@ -33,8 +32,16 @@ module.exports = function(port) {
     };
     let rawLinks = {};
 
-    // Sockend
-    app.listen(port || 5555);
+    const onPort = (err, port) => {
+        server.listen(port);
+        server.on('error', (err) => {
+            if (err.code != 'EADDRINUSE') throw err;
+
+            portfinder.getPort({ port }, onPort);
+        });
+    };
+
+    portfinder.getPort({ port: port || 5555 }, onPort);
 
     monitor.on('status', function(status) {
         let node = monitor.discovery.nodes[status.id];
@@ -177,4 +184,6 @@ module.exports = function(port) {
             return link.source != undefined && link.target != undefined;
         });
     }
+
+    return { monitor, server };
 };

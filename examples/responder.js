@@ -1,4 +1,6 @@
-let Responder = require('../src').Responder;
+'use strict';
+
+let Responder = require('../').Responder;
 
 // Instantiate a new Responder component.
 let randomResponder = new Responder({

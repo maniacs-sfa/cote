@@ -2,10 +2,16 @@ import test from 'ava';
 import LogSuppress from 'log-suppress';
 import async from 'async';
 import r from 'randomstring';
+import sinon from 'sinon';
 
-const { Publisher, Subscriber } = require('../src')();
+const { Publisher, Subscriber } = require('../')();
 
 LogSuppress.init(console);
+
+test('Has no environment', (t) => {
+    t.is(Publisher.environment, '');
+    t.is(Subscriber.environment, '');
+});
 
 test.cb('Supports simple pub&sub', (t) => {
     t.plan(2);
@@ -130,4 +136,49 @@ test.cb('Supports keys & namespaces', (t) => {
             t.end();
         }
     );
+});
+
+test.cb('Publisher throws unknown error', (t) => {
+    t.plan(1);
+
+    let key = r.generate();
+
+    const originalListeners = process.listeners('uncaughtException');
+
+    process.removeAllListeners('uncaughtException');
+
+    process.on('uncaughtException', function(err) {
+        if (err.message != 'unknown error') {
+            originalListeners.forEach((l) => process.on('uncaughtException', l));
+
+            throw err;
+        }
+
+        t.pass();
+        t.end();
+    });
+
+    let publisher = new Publisher({ name: `${t.title}: error throwing publisher`, key });
+    publisher.sock.sock.on('bind', () => publisher.sock.sock.server.emit('error', new Error('unknown error')));
+});
+
+test.cb('Does not try to reconnect twice to the same publisher', (t) => {
+    let key = r.generate();
+
+    let subscriber = new Subscriber({ name: `${t.title}: keyed subscriber`, key });
+    let publisher = new Publisher({ name: `${t.title}: keyed publisher`, key });
+
+    publisher.sock.sock.on('connect', () => {
+        const stub = sinon.stub(publisher.discovery, 'hello');
+
+        setTimeout(() => {
+            stub.restore();
+
+            subscriber.on('cote:added', (obj) => {
+                let alreadyConnected = subscriber.sock.sock.socks.some((s) => s.adv.id == obj.id);
+                t.true(alreadyConnected);
+                t.end();
+            });
+        }, 8000);
+    });
 });

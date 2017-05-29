@@ -37,9 +37,12 @@ module.exports = class Subscriber extends Monitorable(Configurable(Component)) {
     onAdded(obj) {
         super.onAdded();
 
+        let alreadyConnected = this.sock.sock.socks.some((s) => s.adv.id == obj.id);
+        if (alreadyConnected) return;
+
         let address = Subscriber.useHostNames ? obj.hostName : obj.address;
 
-        this.sock.connect(obj.advertisement.port, address);
+        this.sock.connect(obj.advertisement.port, address, (sock) => sock.adv = obj);
     }
 
     on(type, listener) {

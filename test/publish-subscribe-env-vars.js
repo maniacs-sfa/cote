@@ -4,6 +4,12 @@ import async from 'async';
 import r from 'randomstring';
 
 const environment = r.generate();
+
+process.env.COTE_ENV = environment;
+process.env.COTE_USE_HOST_NAMES = true;
+process.env.COTE_MULTICAST_ADDRESS = process.env.COTE_MULTICAST_ADDRESS || '239.1.11.111';
+process.env.DOCKERCLOUD_IP_ADDRESS = true;
+
 const { Publisher, Subscriber } = require('../')({ environment });
 
 LogSuppress.init(console);

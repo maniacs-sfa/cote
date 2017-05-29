@@ -1,3 +1,3 @@
-let cote = require('../src');
+let cote = require('../');
 
 new cote.Monitor({ name: 'Monitor' });

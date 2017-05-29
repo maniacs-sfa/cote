@@ -3,7 +3,7 @@ import LogSuppress from 'log-suppress';
 import r from 'randomstring';
 
 const environment = r.generate();
-let { Requester, Responder } = require('../src')({ environment });
+let { Requester, Responder } = require('../')({ environment });
 
 LogSuppress.init(console);
 

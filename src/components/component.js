@@ -10,10 +10,7 @@ module.exports = class Component extends EventEmitter {
             maxListeners: 2000, // the max number of listeners that can be assigned to an event, defaults to 10.
         });
 
-        if (!advertisement.key ||
-            advertisement.key && advertisement.key.indexOf('$$') == -1)
-            advertisement.key = this.constructor.environment +
-                '$$' + (advertisement.key || '');
+        advertisement.key = this.constructor.environment + '$$' + (advertisement.key || '');
 
         this.advertisement = advertisement;
         this.advertisement.axon_type = this.type;
@@ -49,9 +46,9 @@ module.exports = class Component extends EventEmitter {
         });
     }
 
-    onAdded() {};
+    onAdded() { };
 
-    onRemoved() {};
+    onRemoved() { };
 
     close() {
         this.sock && this.sock.close();

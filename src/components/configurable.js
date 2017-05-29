@@ -1,4 +1,6 @@
-module.exports = Base => class Configurable extends Base {
+'use strict';
+
+module.exports = (Base) => class Configurable extends Base {
     constructor(...args) {
         super(...args);
     }
@@ -8,6 +10,8 @@ module.exports = Base => class Configurable extends Base {
     }
 
     static setEnvironment(environment) {
+        if (!environment) return;
+
         this.constructor._environment = environment + ':';
     }
 

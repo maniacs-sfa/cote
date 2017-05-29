@@ -8,9 +8,8 @@ module.exports = (Base) => class Monitorable extends Base {
             let adv = obj.advertisement;
 
             if (adv.type != 'monitor' ||
-                adv.environment &&
-                adv.environment != this.advertisement.environment ||
-                adv.key && adv.key != this.advertisement.key)
+                adv.key != this.advertisement.key &&
+                adv.key != this.constructor.environment + '$$')
                 return;
 
             this.onMonitorAdded(obj);
@@ -18,8 +17,6 @@ module.exports = (Base) => class Monitorable extends Base {
     }
 
     onMonitorAdded(obj) {
-        if (this.discovery.me.processId == obj.processId) return;
-
         let adv = obj.advertisement;
 
         if (!this.monitorStatusPublisher) {

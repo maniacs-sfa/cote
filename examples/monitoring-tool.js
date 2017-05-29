@@ -1,3 +1,3 @@
-var cote = require('../');
+let cote = require('../');
 
 new cote.MonitoringTool(process.env.PORT);

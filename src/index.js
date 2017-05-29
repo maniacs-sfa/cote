@@ -1,28 +1,27 @@
-var Discovery = require('./components/discovery'),
-    Requester = require('./components/requester'),
-    Responder = require('./components/responder'),
-    Publisher = require('./components/publisher'),
-    Subscriber = require('./components/subscriber'),
-    Sockend = require('./components/sockend'),
-    Monitor = require('./components/monitor'),
-    MonitoringTool = require('./monitoring-tool'),
-    TimeBalancedRequester = require('./components/time-balanced-requester'),
-    PendingBalancedRequester = require(
-        './components/pending-balanced-requester');
+const Discovery = require('./components/discovery');
+const Requester = require('./components/requester');
+const Responder = require('./components/responder');
+const Publisher = require('./components/publisher');
+const Subscriber = require('./components/subscriber');
+const Sockend = require('./components/sockend');
+const Monitor = require('./components/monitor');
+const MonitoringTool = require('./monitoring-tool');
+const TimeBalancedRequester = require('./components/time-balanced-requester');
+const PendingBalancedRequester = require('./components/pending-balanced-requester');
 
-var _ = require('lodash');
+const _ = require('lodash');
 
-function cote(options) {
+const cote = (options) => {
     options = options || {};
 
-    var defaults = {
+    const defaults = {
         environment: '',
         useHostNames: false,
         broadcast: null,
         multicast: null,
     };
 
-    var environmentSettings = {
+    let environmentSettings = {
         environment: process.env.COTE_ENV,
         useHostNames: !!process.env.COTE_USE_HOST_NAMES,
         broadcast: process.env.COTE_BROADCAST_ADDRESS ||
@@ -34,23 +33,24 @@ function cote(options) {
 
     Discovery.setDefaults(options);
 
-    var components = [
+    let components = [
         Requester,
         Responder,
         Publisher,
         Subscriber,
         Sockend,
         TimeBalancedRequester,
-        PendingBalancedRequester];
+        PendingBalancedRequester,
+    ];
 
     components.forEach(function(component) {
         component.setEnvironment(options.environment);
         component.setUseHostNames &&
-        component.setUseHostNames(options.useHostNames);
+            component.setUseHostNames(options.useHostNames);
     });
 
     return cote;
-}
+};
 
 cote.Requester = Requester;
 cote.Responder = Responder;

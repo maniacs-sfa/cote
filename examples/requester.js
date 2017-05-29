@@ -1,4 +1,6 @@
-let Requester = require('../src').Requester;
+'use strict';
+
+let Requester = require('../').Requester;
 
 let randomRequest = new Requester({
     name: 'randomReq',

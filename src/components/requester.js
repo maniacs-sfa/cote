@@ -16,9 +16,12 @@ module.exports = class Requester extends Monitorable(Configurable(Component)) {
     onAdded(obj) {
         super.onAdded(obj);
 
+        let alreadyConnected = this.sock.socks.some((s) => s.adv.id == obj.id);
+        if (alreadyConnected) return;
+
         let address = Requester.useHostNames ? obj.hostName : obj.address;
 
-        this.sock.connect(obj.advertisement.port, address);
+        this.sock.connect(obj.advertisement.port, address, (sock) => sock.adv = obj);
     }
 
     send(...args) {

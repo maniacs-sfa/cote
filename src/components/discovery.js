@@ -3,7 +3,6 @@ const colors = require('colors');
 const _ = require('lodash');
 
 class Discovery extends Discover {
-
     constructor(advertisement, options = {}) {
         _.defaults(options, Discovery.defaults, {
             helloInterval: 2000,

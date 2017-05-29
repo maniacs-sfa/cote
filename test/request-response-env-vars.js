@@ -3,7 +3,13 @@ import LogSuppress from 'log-suppress';
 import r from 'randomstring';
 
 const environment = r.generate();
-let { Requester, Responder } = require('../')({ environment });
+
+process.env.COTE_ENV = environment;
+process.env.COTE_USE_HOST_NAMES = true;
+process.env.COTE_MULTICAST_ADDRESS = process.env.COTE_MULTICAST_ADDRESS || '239.1.11.111';
+process.env.DOCKERCLOUD_IP_ADDRESS = true;
+
+let { Requester, Responder } = require('../');
 
 LogSuppress.init(console);
 
@@ -58,8 +64,8 @@ test.cb('Supports keys & namespaces', (t) => {
     let key = r.generate();
     let namespace = r.generate();
 
-    let requester = new Requester({ name: `RRE ${t.title}: kns requester`, key, namespace });
-    let responder = new Responder({ name: `RRE ${t.title}: kns responder`, key, namespace });
+    let requester = new Requester({ name: `RREV ${t.title}: kns requester`, key, namespace });
+    let responder = new Responder({ name: `RREV ${t.title}: kns responder`, key, namespace });
 
     requester.send({ type: 'test', args: [1, 2, 6] });
 
